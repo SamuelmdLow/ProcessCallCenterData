@@ -144,29 +144,6 @@ def buildServers(data):
 
     return servers
 
-def aveDayProductivity(servers):
-    sum = 0
-    count = 0
-    for server in servers:
-        for day in server.days:
-            count += 1
-            sum += day.productivity
-    aveProductivity = sum/count
-    return aveProductivity
-
-def ProductivityOverDay(servers):
-    data = []
-
-    for server in servers:
-        for day in server.days:
-            first = day.start
-            for call in day.smallers:
-                if day.end - call.end > 60*60*2:
-                    time = call.start-first
-
-                    line = [time, call.callTime]
-                    data.append(line)
-    return data
 
 def ProductivityOverWeek(servers):
     data = []
@@ -437,23 +414,24 @@ def first(e):
     return e[0]
 
 required = 5
-newData = []
-data = []
 
-p = Path(r'original data').glob('**/*')
-directory = [file for file in p]
-for file in directory:
-    if "csv" in file.name:
-        print("opening " + file.name + "...")
-        data = data + readCSV(file)
-# data = readCSV("original data\\february.csv")
-print("cleaning data...")
-data = cleanData(data, 10)
-print("sorting data...")
-data = sortByTime(data)
-print("processing data...")
-servers = buildServers(data)
+def initialize():
+    data = []
 
+    p = Path(r'original data').glob('**/*')
+    directory = [file for file in p]
+    for file in directory:
+        if "csv" in file.name:
+            print("opening " + file.name + "...")
+            data = data + readCSV(file)
+    # data = readCSV("original data\\february.csv")
+    print("cleaning data...")
+    data = cleanData(data, 10)
+    print("sorting data...")
+    data = sortByTime(data)
+    print("processing data...")
+    servers = buildServers(data)
+    return servers
 '''
 filename = "hoursOnDay"
 print(filename + " started!")
@@ -479,15 +457,3 @@ data = averageWeek(data, 30)
 createCSV(data, filename + ".csv")
 print(filename + " finished!")
 '''
-ave = aveDayProductivity(servers)
-
-filename = "overDay"
-print(filename + " started!")
-data = ProductivityOverDay(servers)
-data.sort(key=first)
-#data = rollingAverageDay(data, 300, 60*60*2.5, 30)
-data = rollingAverageDay2(data, 60*60*1, 60*60*1, 30, ave)
-createCSV(data, filename + ".csv")
-print(filename + " finished!")
-
-print("finished!")
